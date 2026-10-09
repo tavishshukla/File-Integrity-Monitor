@@ -140,3 +140,7 @@ File-Integrity-Monitor/
 ## Security note
 
 Only monitor directories you own or are authorized to inspect. For a production-style implementation, store the baseline outside the monitored directory and protect it from unauthorized modification.
+
+## Recommended workflow
+
+Create the baseline first with `python main.py baseline --path ./sample_data`, make an authorized test-file change, and then run `python main.py check --path ./sample_data`. The monitor reports differences without modifying monitored files.
