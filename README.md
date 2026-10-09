@@ -154,3 +154,7 @@ python main.py check --path ./sample_data --fail-on-change
 ```
 
 With this option, detected changes produce exit status `2`; an unchanged directory still exits normally.
+
+## Custom baseline files
+
+When using a custom baseline filename, pass the same name to the scanner so the baseline file itself is excluded from integrity hashing.
