@@ -41,6 +41,12 @@ def main() -> None:
             default=".fim-baseline.json",
             help="Baseline JSON file",
         )
+        if name == "check":
+            command.add_argument(
+                "--fail-on-change",
+                action="store_true",
+                help="Exit with status 2 when changes are detected",
+            )
 
     watch = sub.add_parser("watch")
     watch.add_argument("--path", required=True)
@@ -71,7 +77,10 @@ def main() -> None:
         )
 
     if args.cmd == "check":
-        report(compare(old, scan(root)))
+        changes = compare(old, scan(root))
+        changed = report(changes)
+        if args.fail_on_change and changed:
+            raise SystemExit(2)
         return
 
     print("Watching. Ctrl+C to stop.")
