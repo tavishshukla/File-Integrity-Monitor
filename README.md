@@ -144,3 +144,13 @@ Only monitor directories you own or are authorized to inspect. For a production-
 ## Recommended workflow
 
 Create the baseline first with `python main.py baseline --path ./sample_data`, make an authorized test-file change, and then run `python main.py check --path ./sample_data`. The monitor reports differences without modifying monitored files.
+
+## CI-friendly checks
+
+For scripts or automated checks, use:
+
+```bash
+python main.py check --path ./sample_data --fail-on-change
+```
+
+With this option, detected changes produce exit status `2`; an unchanged directory still exits normally.
