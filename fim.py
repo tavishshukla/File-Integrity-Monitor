@@ -9,12 +9,12 @@ def sha256_file(path: Path) -> str:
             digest.update(chunk)
     return digest.hexdigest()
 
-def scan(root: Path) -> dict[str, str]:
+def scan(root: Path, baseline_name: str = ".fim-baseline.json") -> dict[str, str]:
     root = root.resolve()
     return {
         str(p.relative_to(root)): sha256_file(p)
         for p in root.rglob("*")
-        if p.is_file() and p.name != ".fim-baseline.json"
+        if p.is_file() and p.name != baseline_name
     }
 
 def compare(old: dict[str, str], new: dict[str, str]) -> dict[str, list[str]]:
