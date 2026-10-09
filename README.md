@@ -2,19 +2,16 @@
 
 A defensive file-integrity monitoring tool that uses SHA-256 hashes to detect files being added, removed, or changed.
 
-It is useful for learning a basic security concept used by real defensive systems: establish a known-good baseline and compare the current state against it later.
-
 ## Features
 
-- SHA-256 file hashing
-- Recursive directory scanning
+- SHA-256 hashing
+- Recursive scanning
 - Baseline creation
-- Added-file detection
-- Removed-file detection
-- Changed-file detection
+- Added/removed/changed detection
 - Continuous watch mode
+- Custom baseline location
 - Automated tests
-- Never modifies monitored files
+- Read-only monitoring
 
 ## Requirements
 
@@ -22,40 +19,25 @@ It is useful for learning a basic security concept used by real defensive system
 - Python **3.11 or newer**
 - Git
 
-## 1. Install Python
+## Setup
 
-Download Python:
+Install Python from https://www.python.org/downloads/ and Git from https://git-scm.com/downloads/.
 
-https://www.python.org/downloads/
-
-On Windows, enable **Add Python to PATH** during installation.
-
-Check:
+Verify:
 
 ```bash
 python --version
-```
-
-## 2. Install Git
-
-Download:
-
-https://git-scm.com/downloads
-
-Check:
-
-```bash
 git --version
 ```
 
-## 3. Clone the repository
+Clone:
 
 ```bash
 git clone https://github.com/tavishshukla/File-Integrity-Monitor.git
 cd File-Integrity-Monitor
 ```
 
-## 4. Create a virtual environment
+Create a virtual environment.
 
 ### Windows
 
@@ -71,18 +53,14 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-## 5. Install dependencies
+Install:
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Pip normally comes with Python, so a separate pip download is not required.
-
-## 6. Create a test folder
-
-It is best to start with a folder specifically created for the experiment.
+## Create a test directory
 
 Windows:
 
@@ -98,111 +76,54 @@ mkdir -p sample_data
 echo "Hello" > sample_data/example.txt
 ```
 
-You can also use an existing folder that you own or are authorized to monitor.
-
-## 7. Create the baseline
-
-Run:
+## Create a baseline
 
 ```bash
 python main.py baseline --path ./sample_data
 ```
 
-You should see something similar to:
+A SHA-256 hash is recorded for every file.
 
-```
-Baseline saved for 1 files.
-```
+Use a custom baseline path if desired:
 
-The baseline is stored in:
-
-```
-.fim-baseline.json
+```bash
+python main.py baseline --path ./sample_data --baseline ./data/baseline.json
 ```
 
-## 8. Check for changes
-
-Run:
+## Check for changes
 
 ```bash
 python main.py check --path ./sample_data
 ```
 
-If nothing changed, there should be no change alerts.
+Edit a file and run the check again. You should receive a `CHANGED` result.
 
-Now edit `sample_data/example.txt` and run the check again.
+Create a new file for an `ADDED` result and remove a file for a `REMOVED` result.
 
-You should see:
-
-```
-CHANGED sample_data/example.txt
-```
-
-## 9. Test added files
-
-Create another file:
-
-Windows:
-
-```bat
-echo New file > sample_data\\new.txt
-```
-
-Linux/macOS:
-
-```bash
-echo "New file" > sample_data/new.txt
-```
-
-Then:
-
-```bash
-python main.py check --path ./sample_data
-```
-
-You should see an `ADDED` result.
-
-## 10. Test removed files
-
-Delete a monitored file and run:
-
-```bash
-python main.py check --path ./sample_data
-```
-
-You should see a `REMOVED` result.
-
-## 11. Use watch mode
-
-Watch the directory continuously:
+## Watch continuously
 
 ```bash
 python main.py watch --path ./sample_data --interval 5
 ```
 
-The program checks the directory every 5 seconds.
+Stop with `Ctrl+C`.
 
-Stop it with:
+## How it works
 
-```
-Ctrl+C
-```
+1. Scan the selected directory recursively.
+2. Calculate SHA-256 for each file.
+3. Save the hashes as the known-good baseline.
+4. Scan again later.
+5. Compare current hashes with the baseline.
+6. Report added, removed, and changed files.
 
-## 12. Run the tests
+The monitor never changes the files it is checking.
+
+## Tests
 
 ```bash
 python -m pytest
 ```
-
-## How it works
-
-1. The monitor recursively scans the selected directory.
-2. Each file is read and hashed with SHA-256.
-3. The resulting hashes are saved as the baseline.
-4. Later scans are compared with the baseline.
-5. Differences are reported as added, removed, or changed files.
-
-A changed SHA-256 hash means the file's contents are different from the baseline.
 
 ## Project structure
 
@@ -216,8 +137,6 @@ File-Integrity-Monitor/
     └── test_fim.py
 ```
 
-## Important note
+## Security note
 
-The baseline file is itself a file. Keep `.fim-baseline.json` outside the directory being monitored when building a more advanced version of the project.
-
-Only monitor files and folders that you own or are authorized to inspect.
+Only monitor directories you own or are authorized to inspect. For a production-style implementation, store the baseline outside the monitored directory and protect it from unauthorized modification.
